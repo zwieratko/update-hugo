@@ -14,7 +14,7 @@
 $current_path_at_start = (Get-Item .).FullName
 $base_path = "https://github.com/gohugoio/hugo/releases/download/"
 #$new_version = "v0.106.0"
-$new_version = curly --silent "https://api.github.com/repos/gohugoio/hugo/releases/latest" | jq -r .tag_name
+$new_version = (Invoke-WebRequest -usebasicparsing -URI "https://api.github.com/repos/gohugoio/hugo/releases/latest").content | jq -r .tag_name
 $hugo_extended = "/hugo_extended_"
 $hugo_version = $new_version.substring(1)
 $hugo_arch = "_Windows-amd64.zip"
@@ -71,7 +71,7 @@ if (Test-Path -Path $checked_path_binary -PathType Leaf) {
 }
 
 # Copy Hugo binary to final destination
-Copy-Item $checked_path_binary -Destination "D:\bin\hugo"
+Copy-Item $checked_path_binary -Destination "D:\bin\hugo.exe"
 
 $installed_hugo_version = (hugo version).substring(6,7)
 Write-Host "Installed Hugo version: "$installed_hugo_version
