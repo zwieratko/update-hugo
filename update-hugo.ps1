@@ -14,7 +14,7 @@
 $current_path_at_start = (Get-Item .).FullName
 $base_path = "https://github.com/gohugoio/hugo/releases/download/"
 #$new_version = "v0.106.0"
-$new_version = (Invoke-WebRequest -usebasicparsing -URI "https://api.github.com/repos/gohugoio/hugo/releases/latest").content | jq -r .tag_name
+$new_version = ((Invoke-WebRequest -usebasicparsing -URI "https://api.github.com/repos/gohugoio/hugo/releases/latest").content | convertfrom-json ).tag_name
 $hugo_extended = "/hugo_extended_"
 $hugo_version = $new_version.substring(1)
 $hugo_arch = "_Windows-amd64.zip"
