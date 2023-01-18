@@ -14,7 +14,11 @@
 $current_path_at_start = (Get-Item .).FullName
 $base_path = "https://github.com/gohugoio/hugo/releases/download/"
 #$new_version = "v0.106.0"
-$new_version = ((Invoke-WebRequest -usebasicparsing -URI "https://api.github.com/repos/gohugoio/hugo/releases/latest").content | convertfrom-json ).tag_name
+$params = @{
+    useBasicParsing = $true
+    URI             = "https://api.github.com/repos/gohugoio/hugo/releases/latest"
+}
+$new_version = ((Invoke-WebRequest @params).content | convertfrom-json ).tag_name
 $hugo_extended = "/hugo_extended_"
 $hugo_version = $new_version.substring(1)
 $hugo_arch = "_Windows-amd64.zip"
@@ -22,13 +26,14 @@ $hugo_arch = "_Windows-amd64.zip"
 Write-Host $base_path$new_version$hugo_extended$hugo_version$hugo_arch
 
 Write-Host "................................"
-Write-Host "Download and isntall Hugo binary"
+Write-Host "Download and install Hugo binary"
 Write-Host "................................"
 Write-Host "New version is: "$new_version
 $answer = Read-Host "Is it correct (y/n) ?"
 if ($answer -eq 'y') {
     Write-Host "OK."
-} else {
+}
+else {
     $corrected_version = Read-Host "Type the correct version number, please (for example v0.91.2)"
     Write-Host "New version is: "$corrected_version
     $answer = Read-Host "Is it correct (y/n) ?"
@@ -36,7 +41,8 @@ if ($answer -eq 'y') {
         Write-Host "OK."
         $new_version = $corrected_version
         $hugo_version = $new_version.substring(1)
-    } else {
+    }
+    else {
         Write-Host "Sorry. We have to exit."
         Write-Host "................................"
         exit 1
@@ -48,32 +54,34 @@ $local_path = "D:\bin\"
 Write-Host $local_path
 New-Item -ItemType "directory" -Path $local_path -Name $hugo_version -Force
 #Set-Location $hugo_version
-$checked_path = $local_path+$hugo_version+"\hugo_extended_"+$hugo_version+$hugo_arch
+$checked_path = $local_path + $hugo_version + "\hugo_extended_" + $hugo_version + $hugo_arch
 Write-Host $checked_path
 if (Test-Path -Path $checked_path -PathType Leaf) {
     Write-Host "OK." -ForegroundColor DarkGreen -NoNewline
     Write-Host "We already have that version of Hugo archive."
-} else {
+}
+else {
     Write-Host "Downloading..."
-    $url_for_download = $base_path+$new_version+$hugo_extended+$hugo_version+$hugo_arch
+    $url_for_download = $base_path + $new_version + $hugo_extended + $hugo_version + $hugo_arch
     Write-Host $url_for_download
     Invoke-WebRequest $url_for_download -OutFile $checked_path
 }
 
-$checked_path_binary = $local_path+$hugo_version+"\hugo.exe"
+$checked_path_binary = $local_path + $hugo_version + "\hugo.exe"
 Write-Host $checked_path_binary
 if (Test-Path -Path $checked_path_binary -PathType Leaf) {
     Write-Host "OK." -ForegroundColor DarkGreen -NoNewline
     Write-Host "We already have that version of Hugo binary."
-} else {
+}
+else {
     Write-Host "Extracting..."
-    Expand-Archive -Path $checked_path -DestinationPath ($local_path+$hugo_version)
+    Expand-Archive -Path $checked_path -DestinationPath ($local_path + $hugo_version)
 }
 
 # Copy Hugo binary to final destination
 Copy-Item $checked_path_binary -Destination "D:\bin\hugo.exe"
 
-$installed_hugo_version = (hugo version).substring(6,7)
+$installed_hugo_version = (hugo version).substring(6, 7)
 Write-Host "Installed Hugo version: "$installed_hugo_version
 
 Set-Location $current_path_at_start
