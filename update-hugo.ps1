@@ -45,7 +45,7 @@ $params = @{
 $new_version = ((Invoke-WebRequest @params).content | convertfrom-json ).tag_name
 $hugo_extended = "/hugo_extended_"
 $hugo_version = $new_version.substring(1)
-$hugo_arch = "_Windows-amd64.zip"
+$hugo_arch = "_windows-amd64.zip"
 
 Write-Debug $base_path$new_version$hugo_extended$hugo_version$hugo_arch
 
@@ -67,10 +67,12 @@ if ($installed_hugo_version -eq $new_version) {
         $answer = 'n'
         while ($answer -ne 'y') {
             $desired_version = Read-Host "Type the desired version number, please (for example v0.109.0)"
-            Write-Host "Selected version is: "$desired_version
-            $answer = Read-Host "Is it correct (y/n) ?"
             if ($desired_version -match '^v0\.\d{2,3}\.\d') {
-                $answer = 'y'
+                Write-Host "Selected version is: "$desired_version
+                $answer = Read-Host "Is it correct (y/n) ?"
+                if (-not $answer) {
+                    $answer = 'y'
+                }
             }
             else {
                 $answer = 'n'
@@ -85,6 +87,9 @@ if ($installed_hugo_version -eq $new_version) {
 }
 
 $answer = Read-Host "Do you want to continue installing version $hugo_version (y/n) ?"
+if (-not $answer) {
+    $answer = 'y'
+}
 if ($answer -eq 'y') {
     Write-Host "OK."
 }
@@ -113,7 +118,15 @@ else {
     Write-Host "Downloading..."
     $url_for_download = $base_path + $new_version + $hugo_extended + $hugo_version + $hugo_arch
     Write-Host $url_for_download
-    Invoke-WebRequest $url_for_download -OutFile $checked_path
+    try {
+        Invoke-WebRequest $url_for_download -OutFile $checked_path
+        Write-Host "OK."
+    }
+    catch {
+        Write-Warning "Sorry. Version $hugo_version is not available."
+        Write-Host "End."
+        Exit 1
+    }
 }
 
 $checked_path_binary = $local_path + $hugo_version + "\hugo.exe"
