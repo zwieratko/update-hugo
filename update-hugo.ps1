@@ -20,7 +20,11 @@ Filename: update-hugo.ps1
 param (
     [Parameter()]
     [switch]
-    $increaseDebugVerbosity
+    $increaseDebugVerbosity,
+
+    [Parameter()]
+    [switch]
+    $olderForce
 )
 
 Write-Host "Wait a seconds, please. Everything is preparing..."
@@ -58,31 +62,38 @@ Write-Host "Latest available version at Github  is :", $new_version
 
 if ($installed_hugo_version -eq $new_version) {
     Write-Host "We already have installed latest version of Hugo."
-    $answer = Read-Host "Do you want to install other version (y/n) ?"
-    if ($answer -ne 'y') {
-        Write-Host "End."
-        Exit
-    }
-    else {
-        $answer = 'n'
-        while ($answer -ne 'y') {
-            $desired_version = Read-Host "Type the desired version number, please (for example v0.109.0)"
-            if ($desired_version -match '^v0\.\d{2,3}\.\d') {
-                Write-Host "Selected version is: "$desired_version
-                $answer = Read-Host "Is it correct (y/n) ?"
-                if (-not $answer) {
-                    $answer = 'y'
+    if ($olderForce -eq $true) {
+        $answer = Read-Host "Do you want to install other version (y/n) ?"
+        if ($answer -ne 'y') {
+            Write-Host "End."
+            Exit
+        }
+        else {
+            $answer = 'n'
+            while ($answer -ne 'y') {
+                $desired_version = Read-Host "Type the desired version number, please (for example v0.109.0)"
+                if ($desired_version -match '^v0\.\d{2,3}\.\d') {
+                    Write-Host "Selected version is: "$desired_version
+                    $answer = Read-Host "Is it correct (y/n) ?"
+                    if (-not $answer) {
+                        $answer = 'y'
+                    }
+                }
+                else {
+                    $answer = 'n'
                 }
             }
-            else {
-                $answer = 'n'
+            if ($answer -eq 'y') {
+                Write-Host "OK."
+                $new_version = $desired_version
+                $hugo_version = $new_version.substring(1)
             }
         }
-        if ($answer -eq 'y') {
-            Write-Host "OK."
-            $new_version = $desired_version
-            $hugo_version = $new_version.substring(1)
-        }
+    } else {
+        <# Action when all if and elseif conditions are false #>
+        Write-Host "If you want to install older version anyway, use the parameter -o | -older | -olderForce please."
+        Write-Host "End."
+        Exit
     }
 }
 
