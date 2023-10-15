@@ -99,8 +99,8 @@ else {
     Exit 1
 }
 
-#Set-Location D:\bin
-$local_path = "D:\bin\"
+#Set main location for packed binary
+$local_path = "D:\bin\hugo\"
 Write-Debug $local_path
 
 
